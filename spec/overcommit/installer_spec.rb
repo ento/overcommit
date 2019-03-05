@@ -54,6 +54,24 @@ describe Overcommit::Installer do
               hook_files_installed?(hooks_dir)
             }.from(false).to(true)
           end
+
+          context 'and the master hook is not writable' do
+            let(:template_dir) { Dir.mktmpdir }
+            let(:template_master_hook) { File.join(template_dir, 'overcommit-hook') }
+
+            before do
+              FileUtils.touch(template_master_hook)
+              FileUtils.chmod('a=r', template_master_hook)
+              stub_const('Overcommit::Installer::MASTER_HOOK', template_master_hook)
+            end
+
+            it 'the installed master hook is writable' do
+              File.writable?(template_master_hook).should == false
+              expect { subject }.to change {
+                File.writable?(master_hook)
+              }.from(false).to(true)
+            end
+          end
         end
 
         context 'and Overcommit hooks were previously installed' do

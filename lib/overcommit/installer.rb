@@ -101,6 +101,12 @@ module Overcommit
     def install_master_hook
       FileUtils.mkdir_p(hooks_path)
       FileUtils.cp(MASTER_HOOK, master_hook_install_path)
+      # The gem source may be unwritable depending on the installation method
+      # and therefore the copied master hook as well; ensure the installed hook
+      # can be updated by the user later on.
+      unless File.writable?(master_hook_install_path)
+        FileUtils.chmod('u+w', master_hook_install_path)
+      end
     end
 
     def uninstall_master_hook
